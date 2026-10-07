@@ -412,6 +412,7 @@ section{background:var(--card);border:1px solid var(--line);border-radius:24px;p
   .grid{grid-template-columns:minmax(0,1fr);grid-template-areas:"mapa" "alt" "vento" "prancha" "mare" "horario"}
   .mapa{overflow-x:auto;display:block}.mapa svg{min-width:720px}
   .horario{flex-direction:column;align-items:stretch!important}
+  #falarTxt{display:none}
 }
 /* modo tela: celular deitado no quiosque, tudo numa tela só, sem rolagem */
 @media (orientation:landscape) and (max-height:520px){
@@ -428,7 +429,6 @@ section{background:var(--card);border:1px solid var(--line);border-radius:24px;p
     grid-template-columns:54% minmax(0,1.15fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(0,1fr) auto;
     grid-template-areas:"mapa alt vento" "mapa prancha mare" "mapa horario horario"}
   .mapa{display:block;border-radius:14px;overflow:hidden}.mapa svg{height:100%;min-width:0}
-  .mapa #pontos text.rotulo,.mapa #pontos rect{display:none}
   .legenda{top:auto;bottom:6px;right:auto;left:6px;padding:4px 7px;border-radius:8px;font-size:8.5px;line-height:1.55}
   .legenda .t{font-size:7.5px}.legenda i{width:10px;border-top-width:3px;margin-right:4px}
   section{padding:7px 9px;border-radius:14px;gap:2px;overflow:hidden}
@@ -458,6 +458,7 @@ section{background:var(--card);border:1px solid var(--line);border-radius:24px;p
     </div>
     <div style="display:flex;align-items:center;gap:16px">
       <div class="mono" style="font-size:13px;color:var(--muted);text-align:right;line-height:1.5" id="quando"></div>
+      <button class="pill" id="falar" aria-label="Ouvir a previsão" style="background:var(--card);color:var(--fg);border:1px solid var(--line);font:inherit;cursor:pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg><span id="falarTxt">Ouvir</span></button>
       <div class="pill" id="status"></div>
     </div>
   </header>
@@ -643,8 +644,22 @@ function mostrar(d) {
       <span style="${on ? 'color:var(--fg)' : ''}">${x.t.slice(11,13)}</span></div>`;
   }).join('');
 
+  fala = `Previsão para ${d === hojeISO ? 'hoje' : DIA[dt.getDay()] + ', dia ' + +d.slice(8)}. ` +
+    `${ehHoje ? 'Agora' : 'Às ' + +h.t.slice(11,13) + ' horas'}: ${st[0].toLowerCase()}, ondas de ${num(h.est)} metros, nota ${num(h.nota)} de 5. ` +
+    `Vento ${vt}, ${h.vel ?? '?'} quilômetros por hora. Maré ${enchendo ? 'enchendo' : 'vazando'}. ` +
+    `Melhor horário das ${ini} às ${fim} horas. Prancha: ${m.prancha.toLowerCase()}.`;
   desenharMapa(h);
 }
+
+const DIA = ['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
+let fala = '';
+if (!('speechSynthesis' in window)) $('falar').hidden = true;
+$('falar').onclick = () => {  // toca de novo = para
+  if (speechSynthesis.speaking) return speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(fala);
+  u.lang = 'pt-BR';
+  speechSynthesis.speak(u);
+};
 
 // setas das ondulações e do vento no mapa (norte para cima; direção = de onde vem)
 function desenharMapa(h) {
