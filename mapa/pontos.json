@@ -1,0 +1,20 @@
+{
+  "mapa": "barrinha.svg",
+  "largura": 1621,
+  "altura": 662,
+  "obs": "x/y no sistema de coordenadas do SVG (igual à foto de satélite original). A ordem segue o caminho da onda: 1 levanta, 4 morre na beira.",
+  "pontos": [
+    {"id": 1, "nome": "Ponta do Molhe", "x": 860, "y": 305,
+     "descricao": "Onde a onda levanta primeiro, contornando a ponta do molhe."},
+    {"id": 2, "nome": "Pico do Meio", "x": 740, "y": 280,
+     "descricao": "Lineup principal, onde a galera senta no meio da baía."},
+    {"id": 3, "nome": "Canto do Molhe", "x": 715, "y": 455,
+     "descricao": "Parte de dentro, colada no molhe. Mais protegida e menor."},
+    {"id": 4, "nome": "Inside (beirinha)", "x": 580, "y": 415,
+     "descricao": "Onde a onda perde força ou fecha na beira."},
+    {"id": 5, "nome": "Banco Norte", "x": 440, "y": 170,
+     "descricao": "Bancada do canto norte da praia, longe do molhe."},
+    {"id": 6, "nome": "Atrás do Molhe", "x": 1045, "y": 430,
+     "descricao": "Lado de fora do molhe, perto do costão. Só quebra com mar grande (ex.: 04/10/2026)."}
+  ]
+}
