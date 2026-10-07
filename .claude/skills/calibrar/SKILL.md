@@ -14,7 +14,7 @@ O usuário conta, em português livre, como estava a Barrinha num dia em que sur
 | **Data e hora** | Converta datas relativas ("domingo", "ontem", "sábado passado") usando a data de hoje. Arredonde a hora para a hora cheia mais próxima ("umas 15h30" → 16; "de manhã cedo" → pergunte ou use 7 e diga que assumiu). |
 | **Altura (m)** | Use o número que ele disser. Se vier em linguagem de surfista, converta: joelho 0.5 · cintura 0.7 · peito 1.0 · ombro 1.2 · cabeça 1.5 · meio metro acima da cabeça 2.0 · "gigante"/"dois metros" 2.0+. É a altura da **série na Barrinha**, não a do mar aberto. |
 | **Nota (1–5)** | Nota **para o nível dele**: intermediário, com pouco condicionamento para varar a arrebentação. Mar grande e pesado pode ser nota baixa mesmo bonito. Se ele não der a nota, proponha uma com base no relato e peça para confirmar. |
-| **Pontos do mapa** | `--levanta` = onde a onda levanta/quebra primeiro; `--morre` = onde perde força ou fecha. Leia os ids e nomes atuais em `mapa/pontos.json` (hoje: 1 Ponta do Molhe, 2 Pico do Meio, 3 Canto do Molhe, 4 Inside/beirinha, 5 Banco Norte, 6 Atrás do Molhe). Só preencha se o relato indicar o lugar; não chute. |
+| **Pontos do mapa** | `--levanta` = onde a onda levanta/quebra primeiro; `--morre` = onde perde força ou fecha. Leia os ids e nomes atuais em `mapa/pontos.json` (hoje: 1 Ponta do Molhe, 2 Pico do Meio, 3 Canto do Molhe, 4 Inside/beirinha, 5 Banco Norte, 6 Bolha, atrás do molhe). Só preencha se o relato indicar o lugar; não chute. |
 | **Obs** | Resumo curto do relato nas palavras dele: força, se fechava, vento, maré, crowd, correnteza. |
 
 **Obrigatórios:** data, hora, altura e nota. Se faltar algum, pergunte só o que falta, numa pergunta só, antes de registrar. Os outros campos são opcionais.

@@ -390,10 +390,13 @@ h1{margin:0;font-size:40px;font-weight:800;letter-spacing:-.02em;line-height:1}
   grid-template-areas:"alt mapa vento" "prancha mapa mare" "horario horario horario"}
 section{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:18px 20px;display:flex;flex-direction:column;justify-content:space-between;gap:10px;min-width:0}
 .row{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.mapa{grid-area:mapa;border-radius:24px;overflow:hidden;background:#0A1A29;border:1px solid var(--line);display:flex;align-items:center}
+.mapa{grid-area:mapa;position:relative;border-radius:24px;overflow:hidden;background:#0A1A29;border:1px solid var(--line);display:flex;align-items:center}
 .mapa svg{display:block;width:100%;height:auto}
 @media (min-width:1101px){.mapa{display:block}.mapa svg{height:100%}}
 .mapa #mapa-titulo,.mapa #swell-fixo{display:none}
+.legenda{position:absolute;top:12px;right:64px;background:rgba(11,27,43,.92);border:1px solid var(--line);border-radius:14px;padding:10px 14px;font:12px/1.7 'IBM Plex Mono',monospace;color:var(--fg)}
+.legenda .t{font-size:10px;letter-spacing:.12em;color:var(--muted)}
+.legenda i{display:inline-block;width:18px;height:0;border-top:4px solid;border-radius:2px;margin-right:8px;vertical-align:middle}
 .bars{flex:1;display:flex;align-items:flex-end;gap:5px;height:76px}
 .bars>div{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px}
 .bars i{display:block;width:100%;border-radius:5px}
@@ -409,6 +412,40 @@ section{background:var(--card);border:1px solid var(--line);border-radius:24px;p
   .grid{grid-template-columns:minmax(0,1fr);grid-template-areas:"mapa" "alt" "vento" "prancha" "mare" "horario"}
   .mapa{overflow-x:auto;display:block}.mapa svg{min-width:720px}
   .horario{flex-direction:column;align-items:stretch!important}
+}
+/* modo tela: celular deitado no quiosque, tudo numa tela só, sem rolagem */
+@media (orientation:landscape) and (max-height:520px){
+  html,body{height:100%;overflow:hidden}body{padding:0}
+  .board{height:100vh;max-width:none;border-radius:0;padding:8px 10px;gap:6px;
+    display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto minmax(0,1fr)}
+  header{flex-wrap:nowrap;align-items:center;gap:10px}
+  #local,#quando,.foot{display:none}
+  h1{font-size:18px}
+  .pill{padding:3px 10px;font-size:11px;gap:5px}.pill svg{width:12px;height:12px}
+  .dias{justify-self:end;max-width:100%;gap:3px;align-self:center}
+  .dia{padding:3px 6px;font-size:10px;gap:3px}.dia .mono{font-size:9px}
+  .grid{grid-column:1/-1;min-height:0;gap:6px;
+    grid-template-columns:46% minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(0,1fr) auto;
+    grid-template-areas:"mapa alt vento" "mapa prancha mare" "mapa horario horario"}
+  .mapa{display:block;border-radius:14px;overflow:hidden}.mapa svg{height:100%;min-width:0}
+  .mapa #pontos text.rotulo,.mapa #pontos rect{display:none}
+  .legenda{top:6px;right:6px;left:auto;padding:4px 7px;border-radius:8px;font-size:8.5px;line-height:1.55}
+  .legenda .t{font-size:7.5px}.legenda i{width:10px;border-top-width:3px;margin-right:4px}
+  section{padding:7px 9px;border-radius:14px;gap:2px;overflow:hidden}
+  .eyebrow{font-size:8.5px}
+  .small{font-size:9.5px;line-height:1.35}
+  #altura{font-size:38px!important}#altura+span{font-size:15px!important}
+  #nota{font-size:11px!important}#tendencia{font-size:9.5px!important}
+  #prancha{font-size:17px!important}.row{font-size:11px!important}
+  .meter,.meter i{height:4px}#medidores{gap:3px!important}
+  #bussola{width:42px;height:42px}#vel{font-size:24px!important}#dirVento{font-size:11px!important}
+  #ventoTipo{padding:2px 7px!important}
+  #mare{font-size:16px!important}#mareSeta{width:14px;height:14px}#mareNivel{font-size:10px!important}
+  #curva{height:26px}#extremos{font-size:9px!important}
+  .horario{flex-direction:row!important;align-items:flex-end!important;gap:10px!important}
+  .horario>div:first-child{min-width:0!important;gap:1px!important}
+  #janela{font-size:17px!important}#motivo{font-size:9px}
+  .bars{height:38px;gap:2px}.bars span{font-size:7.5px}
 }
 </style></head><body>
 <div class="board">
@@ -443,7 +480,7 @@ section{background:var(--card);border:1px solid var(--line);border-radius:24px;p
       <div style="display:flex;flex-direction:column;gap:8px" id="medidores"></div>
     </section>
 
-    <div class="mapa">__MAPA__</div>
+    <div class="mapa"><div class="legenda" id="legenda"></div>__MAPA__</div>
 
     <section style="grid-area:vento">
       <div class="eyebrow">Vento</div>
@@ -508,10 +545,14 @@ $('nome').textContent = D.nome;
 $('rodape').textContent = D.calibrado ? `Calibrado com ${D.n_sessoes} sessões` :
   `${D.n_sessoes} sessão(ões) registrada(s) · ainda usando as regras iniciais do molhe`;
 const svgMapa = document.querySelector('.mapa svg');
-if (svgMapa) {  // corta a faixa de terra à esquerda e preenche o card
-  svgMapa.setAttribute('viewBox', '250 0 1371 662');
+const TELA = matchMedia('(orientation: landscape) and (max-height: 520px)');  // celular deitado (quiosque)
+const enquadrar = () => {  // corta a faixa de terra à esquerda e preenche o card
+  if (!svgMapa) return;
+  svgMapa.setAttribute('viewBox', TELA.matches ? '345 0 800 662' : '250 0 1371 662');
   svgMapa.setAttribute('preserveAspectRatio', 'xMidYMid slice');
-}
+};
+enquadrar();
+TELA.addEventListener('change', enquadrar);
 
 $('dias').innerHTML = dias.map(d => {
   const dt = dataDe(d), m = melhor(d);
@@ -589,7 +630,7 @@ function mostrar(d) {
   const max = Math.max(...surf.map(x => x.nota), 0.1);
   $('barras').innerHTML = surf.map((x, k) => {
     const on = k >= a && k <= b, cor = on ? 'var(--accent)' : x.nota >= lim * 0.75 ? 'var(--dim)' : 'var(--line)';
-    return `<div title="${x.t.slice(11,13)}h · nota ${num(x.nota)} · ${num(x.est)} m"><i style="height:${Math.max(6, 60 * x.nota / max)}px;background:${cor}"></i>
+    return `<div title="${x.t.slice(11,13)}h · nota ${num(x.nota)} · ${num(x.est)} m"><i style="height:${Math.max(4, (TELA.matches ? 24 : 60) * x.nota / max)}px;background:${cor}"></i>
       <span style="${on ? 'color:var(--fg)' : ''}">${x.t.slice(11,13)}</span></div>`;
   }).join('');
 
@@ -632,15 +673,12 @@ function desenharMapa(h) {
     for (const [x, y] of [[620, 70], [1010, 110], [1200, 300], [1480, 330], [700, 610]])
       out += seta(x + vx * Lv / 2, y + vy * Lv / 2, x - vx * Lv / 2, y - vy * Lv / 2, corV, 3, 0.85);
   }
-  // legenda
+  g.innerHTML = out;
+  // legenda em HTML (legível mesmo com o mapa pequeno)
   const linhas = [...onds.map(o => [COR_OND[o.nome], `${o.nome} ${PT[o.setor]} ${o.d}° · ${num(o.h)} m · ${o.p} s`, o.nome === 'Vaga de vento']),
                   [corV, `Vento ${PT[h.setor_vento] ?? '?'} ${h.vel ?? '?'} km/h · ${tipo(h.vento_txt)}`, false]];
-  const alt = 50 + linhas.length * 32;
-  out += `<g transform="translate(1100,100)"><rect width="442" height="${alt}" rx="16" fill="#0B1B2B" fill-opacity="0.92" stroke="#1E3A50"/>
-    <text class="mono" font-size="14" fill="#8FA6B2" letter-spacing="1.5" x="18" y="30">MAR ABERTO · ${h.t.slice(11,13)}H ${h.t.slice(8,10)}/${h.t.slice(5,7)}</text>
-    ${linhas.map(([c, t, tr], k) => `<line x1="18" y1="${58 + k * 32}" x2="44" y2="${58 + k * 32}" stroke="${c}" stroke-width="5" stroke-linecap="round" stroke-dasharray="${tr ? '5 5' : ''}"/>
-      <text class="mono" font-size="17" fill="#EAF2F1" x="56" y="${64 + k * 32}">${t}</text>`).join('')}</g>`;
-  g.innerHTML = out;
+  $('legenda').innerHTML = `<div class="t">MAR ABERTO · ${h.t.slice(11,13)}H ${h.t.slice(8,10)}/${h.t.slice(5,7)}</div>` +
+    linhas.map(([c, t, tr]) => `<div><i style="border-color:${c};border-top-style:${tr ? 'dashed' : 'solid'}"></i>${t}</div>`).join('');
 }
 
 mostrar(dias.includes(hojeISO) ? hojeISO : dias[0]);

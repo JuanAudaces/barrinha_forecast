@@ -101,7 +101,7 @@
       <g transform="translate(440,170)"><circle r="19" fill="#FF8A3D" stroke="#0B1B2B" stroke-width="3"/><text class="num" text-anchor="middle" y="7">5</text>
         <rect x="26" y="-17" width="148" height="34" rx="17" fill="#0B1B2B" fill-opacity="0.9"/><text class="rotulo" x="42" y="6">Banco Norte</text></g>
       <g transform="translate(1045,430)"><circle r="19" fill="#FF8A3D" stroke="#0B1B2B" stroke-width="3"/><text class="num" text-anchor="middle" y="7">6</text>
-        <rect x="26" y="-17" width="172" height="34" rx="17" fill="#0B1B2B" fill-opacity="0.9"/><text class="rotulo" x="42" y="6">Atrás do Molhe</text></g>
+        <rect x="26" y="-17" width="88" height="34" rx="17" fill="#0B1B2B" fill-opacity="0.9"/><text class="rotulo" x="42" y="6">Bolha</text></g>
     </g>
   </g>
 </svg>
