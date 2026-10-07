@@ -425,11 +425,11 @@ section{background:var(--card);border:1px solid var(--line);border-radius:24px;p
   .dias{justify-self:end;max-width:100%;gap:3px;align-self:center}
   .dia{padding:3px 6px;font-size:10px;gap:3px}.dia .mono{font-size:9px}
   .grid{grid-column:1/-1;min-height:0;gap:6px;
-    grid-template-columns:46% minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(0,1fr) auto;
+    grid-template-columns:54% minmax(0,1.15fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(0,1fr) auto;
     grid-template-areas:"mapa alt vento" "mapa prancha mare" "mapa horario horario"}
   .mapa{display:block;border-radius:14px;overflow:hidden}.mapa svg{height:100%;min-width:0}
   .mapa #pontos text.rotulo,.mapa #pontos rect{display:none}
-  .legenda{top:6px;right:6px;left:auto;padding:4px 7px;border-radius:8px;font-size:8.5px;line-height:1.55}
+  .legenda{top:auto;bottom:6px;right:auto;left:6px;padding:4px 7px;border-radius:8px;font-size:8.5px;line-height:1.55}
   .legenda .t{font-size:7.5px}.legenda i{width:10px;border-top-width:3px;margin-right:4px}
   section{padding:7px 9px;border-radius:14px;gap:2px;overflow:hidden}
   .eyebrow{font-size:8.5px}
@@ -440,8 +440,10 @@ section{background:var(--card);border:1px solid var(--line);border-radius:24px;p
   .meter,.meter i{height:4px}#medidores{gap:3px!important}
   #bussola{width:42px;height:42px}#vel{font-size:24px!important}#dirVento{font-size:11px!important}
   #ventoTipo{padding:2px 7px!important}
+  section .row,#ventoTipo,#rajada,#extremos span,#janela{white-space:nowrap}
+  #rajada{font-size:9.5px}
   #mare{font-size:16px!important}#mareSeta{width:14px;height:14px}#mareNivel{font-size:10px!important}
-  #curva{height:26px}#extremos{font-size:9px!important}
+  #curva{height:26px}#extremos{font-size:8.5px!important;gap:4px}
   .horario{flex-direction:row!important;align-items:flex-end!important;gap:10px!important}
   .horario>div:first-child{min-width:0!important;gap:1px!important}
   #janela{font-size:17px!important}#motivo{font-size:9px}
@@ -548,11 +550,18 @@ const svgMapa = document.querySelector('.mapa svg');
 const TELA = matchMedia('(orientation: landscape) and (max-height: 520px)');  // celular deitado (quiosque)
 const enquadrar = () => {  // corta a faixa de terra à esquerda e preenche o card
   if (!svgMapa) return;
-  svgMapa.setAttribute('viewBox', TELA.matches ? '345 0 800 662' : '250 0 1371 662');
-  svgMapa.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+  let vb = '250 0 1371 662', ajuste = 'xMidYMid slice';
+  if (TELA.matches) {  // largura acompanha o formato do card, centrada nos pontos (x 440–1045)
+    const r = svgMapa.parentElement.getBoundingClientRect(), MIN = 780;
+    const w = Math.min(1100, Math.max(MIN, 662 * r.width / r.height));
+    vb = `${745 - w / 2} 0 ${w} 662`;
+    if (w === MIN) ajuste = 'xMidYMid meet';  // card estreito: sobra mar em cima/embaixo, mas nenhum ponto some
+  }
+  svgMapa.setAttribute('viewBox', vb);
+  svgMapa.setAttribute('preserveAspectRatio', ajuste);
 };
 enquadrar();
-TELA.addEventListener('change', enquadrar);
+addEventListener('resize', enquadrar);
 
 $('dias').innerHTML = dias.map(d => {
   const dt = dataDe(d), m = melhor(d);
@@ -581,7 +590,7 @@ function mostrar(d) {
   const i = D.horas.indexOf(h), depois = D.horas[Math.min(i + 3, D.horas.length - 1)];
   const dif = depois.est - h.est;
   $('tendencia').textContent = `${dif > 0.1 ? '▲ subindo' : dif < -0.1 ? '▼ baixando' : '● estável'} · ${num(h.min)}–${num(h.max)} m`;
-  $('detalhes').innerHTML = `${h.tamanho} · ${h.periodo} s<br>Água ${h.agua ?? '?'} °C · ${h.roupa}<br>Ar ${h.ar ?? '?'} °C`;
+  $('detalhes').innerHTML = `${h.tamanho} · ${h.periodo} s · ar ${h.ar ?? '?'} °C<br>Água ${h.agua ?? '?'} °C · ${h.roupa}`;
 
   // prancha
   $('prancha').textContent = h.prancha;
