@@ -24,7 +24,8 @@ jobs:
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - run: python3 surf.py && mkdir _site && cp previsao.html _site/index.html
+      - run: pip install edge-tts || true  # sem ele a previsão sai igual, só sem áudio
+      - run: python3 surf.py && mkdir _site && cp previsao.html _site/index.html && (cp -r audio _site/ || true)
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

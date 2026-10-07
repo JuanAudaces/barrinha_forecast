@@ -23,6 +23,7 @@ DIR = Path(__file__).parent
 SESSOES = DIR / "sessoes.csv"
 CALIBRACAO = DIR / "calibracao.json"
 SAIDA = DIR / "previsao.html"
+AUDIO = DIR / "audio"  # publicado ao lado da página
 BRT = timezone(timedelta(hours=-3))  # Brasil sem horário de verão desde 2019
 MAPA = DIR / "mapa" / "barrinha.svg"
 PONTOS = DIR / "mapa" / "pontos.json"
@@ -197,6 +198,55 @@ def buscar_vento(extra, url="https://api.open-meteo.com/v1/forecast"):
     return get_json(url, p)["hourly"]
 
 
+def num(x):
+    return "?" if x is None else f"{x:.1f}".replace(".", ",")
+
+
+def fala(dia, horas, agora):
+    """Frase falada do dia (mesma lógica do painel: hoje = agora, outros dias = melhor hora)."""
+    ini_j, fim_j = CONFIG["janela"]
+    surf = [h for h in horas if ini_j <= int(h["t"][11:13]) <= fim_j]
+    m = max(surf, key=lambda h: h["nota"])
+    hoje = dia == agora.strftime("%Y-%m-%d")
+    agora_ = hoje and agora.hour <= fim_j
+    h = horas[agora.hour] if agora_ else m
+    st = ("muito grande" if h["prancha"] == "Acima do seu nível" else "flat" if h["prancha"] == "Flat" else
+          "bom pra cair" if h["nota"] >= 3 else "dá pra cair" if h["nota"] >= 1.5 else "fraco")
+    # melhor horário: horas vizinhas com nota próxima da melhor
+    bi = surf.index(m)
+    lim = max(m["nota"] - 0.4, m["nota"] * 0.85)
+    a = b = bi
+    while a > 0 and surf[a - 1]["nota"] >= lim:
+        a -= 1
+    while b < len(surf) - 1 and surf[b + 1]["nota"] >= lim:
+        b += 1
+    vt = h["vento_txt"].split(" (")[0]
+    vento = "Sem vento" if vt == "sem vento" else f"Vento {vt}, {h['vel']} quilômetros por hora"
+    quando = "hoje" if hoje else ["segunda", "terça", "quarta", "quinta", "sexta", "sábado", "domingo"][
+        datetime.strptime(dia, "%Y-%m-%d").weekday()] + f", dia {int(dia[8:])}"
+    return (f"Previsão para {quando}. {'Agora' if agora_ else 'Às %d horas' % int(h['t'][11:13])}: {st}, "
+            f"ondas de {num(h['est'])} metros, nota {num(h['nota'])} de 5. {vento}. "
+            f"Maré {h['mare_txt'] or 'sem dado'}. Melhor horário das {int(surf[a]['t'][11:13])} "
+            f"às {int(surf[b]['t'][11:13]) + 1} horas. Prancha: {m['prancha'].lower()}.")
+
+
+def gerar_audio(falas):
+    """Grava audio/<dia>.mp3 (o navegador do Fully Kiosk não tem voz). Falhou -> painel usa a voz do aparelho."""
+    try:
+        import asyncio
+        import edge_tts  # ponytail: serviço não oficial da Microsoft; se cair, troca por gTTS
+        AUDIO.mkdir(exist_ok=True)
+
+        async def todos():
+            await asyncio.gather(*(edge_tts.Communicate(t, "pt-BR-FranciscaNeural").save(str(AUDIO / f"{d}.mp3"))
+                                   for d, t in falas.items()))
+        asyncio.run(todos())
+        return True
+    except Exception as e:
+        print(f"Sem áudio ({e.__class__.__name__}: {e}) — instale com: pip install edge-tts")
+        return False
+
+
 def montar_horas(ondas, vento, mar, cal):
     pesos = cal.get("peso_modelo", {})
     mare = mar["sea_level_height_msl"]
@@ -265,6 +315,12 @@ def cmd_previsao():
              "horas": horas, "ideal_inicio": CONFIG["janela"][0], "ideal_fim": CONFIG["janela"][1],
              "calibrado": bool(cal.get("fator_setor") or cal.get("peso_modelo")),
              "n_sessoes": cal.get("n_sessoes", 0)}
+    por_dia = defaultdict(list)
+    for h in horas:
+        por_dia[h["t"][:10]].append(h)
+    agora = datetime.now(BRT)
+    dados["falas"] = {d: fala(d, hs, agora) for d, hs in por_dia.items() if len(hs) == 24}
+    dados["audio"] = gerar_audio(dados["falas"])
     mapa = MAPA.read_text(encoding="utf-8") if MAPA.exists() else ""
     SAIDA.write_text(HTML.replace("__DADOS__", json.dumps(dados)).replace("__MAPA__", mapa), encoding="utf-8")
     print(f"Gerado {SAIDA}")
@@ -644,21 +700,22 @@ function mostrar(d) {
       <span style="${on ? 'color:var(--fg)' : ''}">${x.t.slice(11,13)}</span></div>`;
   }).join('');
 
-  fala = `Previsão para ${d === hojeISO ? 'hoje' : DIA[dt.getDay()] + ', dia ' + +d.slice(8)}. ` +
-    `${ehHoje ? 'Agora' : 'Às ' + +h.t.slice(11,13) + ' horas'}: ${st[0].toLowerCase()}, ondas de ${num(h.est)} metros, nota ${num(h.nota)} de 5. ` +
-    `Vento ${vt}, ${h.vel ?? '?'} quilômetros por hora. Maré ${enchendo ? 'enchendo' : 'vazando'}. ` +
-    `Melhor horário das ${ini} às ${fim} horas. Prancha: ${m.prancha.toLowerCase()}.`;
+  diaAtual = d;
   desenharMapa(h);
 }
 
-const DIA = ['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
-let fala = '';
-if (!('speechSynthesis' in window)) $('falar').hidden = true;
+let diaAtual, audio = new Audio(), voz = window.speechSynthesis;
 $('falar').onclick = () => {  // toca de novo = para
-  if (speechSynthesis.speaking) return speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(fala);
-  u.lang = 'pt-BR';
-  speechSynthesis.speak(u);
+  if (!audio.paused || voz?.speaking) { audio.pause(); return voz?.cancel(); }
+  const vozDoAparelho = () => {  // sem mp3 (rodou sem edge-tts): voz do navegador, que o Fully não tem
+    if (!voz) return;
+    const u = new SpeechSynthesisUtterance(D.falas[diaAtual]);
+    u.lang = 'pt-BR';
+    voz?.speak(u);
+  };
+  if (!D.audio) return vozDoAparelho();
+  audio.src = `audio/${diaAtual}.mp3?v=${encodeURIComponent(D.gerado)}`;
+  audio.play().catch(vozDoAparelho);
 };
 
 // setas das ondulações e do vento no mapa (norte para cima; direção = de onde vem)
