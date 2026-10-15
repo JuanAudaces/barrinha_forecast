@@ -25,7 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: pip install edge-tts || true  # sem ele a previsão sai igual, só sem áudio
-      - run: python3 surf.py && mkdir _site && cp previsao.html _site/index.html && (cp -r audio _site/ || true)
+      - run: python3 surf.py && python3 surf.py sol && mkdir _site && cp previsao.html _site/index.html && cp previsao_sol.html _site/sol.html && (cp -r audio _site/ || true)
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

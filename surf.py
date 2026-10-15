@@ -1,9 +1,9 @@
-"""Previsão de surf personalizada para a Praia da Barrinha (Barra Velha/SC).
+"""Previsão de surf personalizada para a Praia da Barrinha e a Praia do Sol (Barra Velha/SC).
 
-Uso:
-  python surf.py                                  # gera previsao.html e abre no navegador
-  python surf.py log <nota 1-5> <altura_m> ["AAAA-MM-DD HH"] ["obs"]
-  python surf.py calibrar                         # ajusta fatores com o diário de sessões
+Uso (o pico é opcional, padrão barrinha):
+  python surf.py [sol]                                  # gera a página e abre no navegador
+  python surf.py [sol] log <nota 1-5> <altura_m> ["AAAA-MM-DD HH"] ["obs"]
+  python surf.py [sol] calibrar                         # ajusta fatores com o diário de sessões
 """
 import argparse
 import csv
@@ -20,13 +20,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 DIR = Path(__file__).parent
-SESSOES = DIR / "sessoes.csv"
-CALIBRACAO = DIR / "calibracao.json"
-SAIDA = DIR / "previsao.html"
-AUDIO = DIR / "audio"  # publicado ao lado da página
 BRT = timezone(timedelta(hours=-3))  # Brasil sem horário de verão desde 2019
-MAPA = DIR / "mapa" / "barrinha.svg"
-PONTOS = DIR / "mapa" / "pontos.json"
 CAMPOS_SESSAO = ["data_hora", "nota", "altura_m", "obs", "ponto_levanta", "ponto_morre"]
 
 CONFIG = {
@@ -48,7 +42,42 @@ CONFIG = {
     # Nível intermediário, pouco condicionamento: ideal entre 0.7 e 1.5 m, acima de 1.8 m pesa.
     "altura_ideal": (0.7, 1.5),
     "altura_limite": 1.8,
+    "pagina": "./",  # endereço publicado (link entre os picos)
+    # Mapa: recorte padrão, centro dos pontos no modo tela, onde as setas de swell chegam e onde ficam as de vento.
+    "mapa": {"viewbox": [250, 0, 1371, 662], "centro_x": 745, "alvo": [935, 300],
+             "vento": [[620, 70], [1010, 110], [1200, 300], [1480, 330], [700, 610]]},
 }
+
+PICOS = {
+    "barrinha": CONFIG,
+    "sol": {**CONFIG,
+            "nome": "Praia do Sol",
+            "lat": -26.679332,  # o pin onde o usuário mais fica
+            "lon": -48.687376,
+            # Beach break aberto, virado para ~85° (L). Sem molhe: o swell de SE/S entra bem mais que na Barrinha;
+            # o costão no canto sul só segura um pouco o S. Hipótese inicial, a calibração corrige.
+            "fator_direcao": [(0, 0.4), (30, 0.75), (60, 0.95), (90, 1.0), (130, 0.9),
+                              (160, 0.7), (190, 0.4), (230, 0.15), (330, 0.1), (360, 0.4)],
+            "praia_virada_para": 85,
+            "pagina": "sol.html",
+            "mapa": {"viewbox": [150, 0, 1471, 662], "centro_x": 640, "alvo": [640, 330],
+                     "vento": [[300, 90], [820, 110], [1150, 320], [1450, 520], [880, 590]]}},
+}
+
+
+def usar_pico(nome):
+    global CONFIG, SESSOES, CALIBRACAO, SAIDA, AUDIO, MAPA, PONTOS
+    CONFIG = PICOS[nome]
+    sfx = "" if nome == "barrinha" else f"_{nome}"  # a Barrinha mantém os nomes originais
+    SESSOES = DIR / f"sessoes{sfx}.csv"
+    CALIBRACAO = DIR / f"calibracao{sfx}.json"
+    SAIDA = DIR / f"previsao{sfx}.html"
+    AUDIO = DIR / "audio" / nome if sfx else DIR / "audio"  # publicado ao lado da página
+    MAPA = DIR / "mapa" / f"{nome}.svg"
+    PONTOS = DIR / "mapa" / f"pontos{sfx}.json"
+
+
+usar_pico("barrinha")
 
 NOMES_ONDA = {"ecmwf_wam025": "ECMWF", "ncep_gfswave025": "GFS (WW3)",
               "meteofrance_wave": "MeteoFrance", "dwd_gwam": "DWD"}
@@ -235,7 +264,7 @@ def gerar_audio(falas):
     try:
         import asyncio
         import edge_tts  # ponytail: serviço não oficial da Microsoft; se cair, troca por gTTS
-        AUDIO.mkdir(exist_ok=True)
+        AUDIO.mkdir(parents=True, exist_ok=True)
 
         async def todos():
             await asyncio.gather(*(edge_tts.Communicate(t, "pt-BR-FranciscaNeural").save(str(AUDIO / f"{d}.mp3"))
@@ -314,7 +343,9 @@ def cmd_previsao():
     dados = {"nome": CONFIG["nome"], "local": CONFIG["local"], "gerado": datetime.now(BRT).strftime("%d/%m %H:%M"),
              "horas": horas, "ideal_inicio": CONFIG["janela"][0], "ideal_fim": CONFIG["janela"][1],
              "calibrado": bool(cal.get("fator_setor") or cal.get("peso_modelo")),
-             "n_sessoes": cal.get("n_sessoes", 0)}
+             "n_sessoes": cal.get("n_sessoes", 0), "mapa": CONFIG["mapa"],
+             "audio_dir": AUDIO.relative_to(DIR).as_posix(),
+             "outros": [{"nome": p["nome"], "url": p["pagina"]} for p in PICOS.values() if p is not CONFIG]}
     por_dia = defaultdict(list)
     for h in horas:
         por_dia[h["t"][:10]].append(h)
@@ -424,7 +455,7 @@ HTML = r"""<!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="refresh" content="1800">
-<title>Barrinha Forecast</title>
+<title>Surf Forecast</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
@@ -476,7 +507,7 @@ section{background:var(--card);border:1px solid var(--line);border-radius:24px;p
   .board{height:100vh;max-width:none;border-radius:0;padding:8px 10px;gap:6px;
     display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto minmax(0,1fr)}
   header{flex-wrap:nowrap;align-items:center;gap:10px}
-  #local,#quando,.foot{display:none}
+  #local,#quando,.foot,#outros{display:none!important}
   h1{font-size:18px}
   .pill{padding:3px 10px;font-size:11px;gap:5px}.pill svg{width:12px;height:12px}
   .dias{justify-self:end;max-width:100%;gap:3px;align-self:center}
@@ -513,6 +544,7 @@ section{background:var(--card);border:1px solid var(--line);border-radius:24px;p
       <h1 id="nome"></h1>
     </div>
     <div style="display:flex;align-items:center;gap:16px">
+      <nav id="outros" style="display:flex;gap:8px"></nav>
       <div class="mono" style="font-size:13px;color:var(--muted);text-align:right;line-height:1.5" id="quando"></div>
       <button class="pill" id="falar" aria-label="Ouvir a previsão" style="background:var(--card);color:var(--fg);border:1px solid var(--line);font:inherit;cursor:pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg><span id="falarTxt">Ouvir</span></button>
       <div class="pill" id="status"></div>
@@ -601,17 +633,20 @@ const melhor = d => surfaveis(d).reduce((a, b) => b.nota > a.nota ? b : a);
 
 $('local').textContent = D.local;
 $('nome').textContent = D.nome;
+document.title = `${D.nome} · Forecast`;
+$('outros').innerHTML = D.outros.map(o => `<a class="dia" style="text-decoration:none" href="${o.url}">${o.nome} →</a>`).join('');
 $('rodape').textContent = D.calibrado ? `Calibrado com ${D.n_sessoes} sessões` :
-  `${D.n_sessoes} sessão(ões) registrada(s) · ainda usando as regras iniciais do molhe`;
+  `${D.n_sessoes} sessão(ões) registrada(s) · ainda usando as regras iniciais do pico`;
 const svgMapa = document.querySelector('.mapa svg');
 const TELA = matchMedia('(orientation: landscape) and (max-height: 520px)');  // celular deitado (quiosque)
+const MP = D.mapa;
 const enquadrar = () => {  // corta a faixa de terra à esquerda e preenche o card
   if (!svgMapa) return;
-  let vb = '250 0 1371 662', ajuste = 'xMidYMid slice';
-  if (TELA.matches) {  // largura acompanha o formato do card, centrada nos pontos (x 440–1045)
+  let vb = MP.viewbox.join(' '), ajuste = 'xMidYMid slice';
+  if (TELA.matches) {  // largura acompanha o formato do card, centrada nos pontos
     const r = svgMapa.parentElement.getBoundingClientRect(), MIN = 780;
     const w = Math.min(1100, Math.max(MIN, 662 * r.width / r.height));
-    vb = `${745 - w / 2} 0 ${w} 662`;
+    vb = `${MP.centro_x - w / 2} 0 ${w} 662`;
     if (w === MIN) ajuste = 'xMidYMid meet';  // card estreito: sobra mar em cima/embaixo, mas nenhum ponto some
   }
   svgMapa.setAttribute('viewBox', vb);
@@ -714,7 +749,7 @@ $('falar').onclick = () => {  // toca de novo = para
     voz?.speak(u);
   };
   if (!D.audio) return vozDoAparelho();
-  audio.src = `audio/${diaAtual}.mp3?v=${encodeURIComponent(D.gerado)}`;
+  audio.src = `${D.audio_dir}/${diaAtual}.mp3?v=${encodeURIComponent(D.gerado)}`;
   audio.play().catch(vozDoAparelho);
 };
 
@@ -738,7 +773,7 @@ function desenharMapa(h) {
   onds.forEach((o, k) => {
     const cor = COR_OND[o.nome], [ux, uy] = vec(o.d), L = 330 - k * 45;
     const desloc = [0, -30, 30][k] ?? 0;                      // separa setas paralelas
-    const alvo = [935 - uy * desloc, 300 + ux * desloc];
+    const alvo = [MP.alvo[0] - uy * desloc, MP.alvo[1] + ux * desloc];
     const ini = [alvo[0] + ux * L, alvo[1] + uy * L], w = Math.min(2 + o.h * 3, 6);
     if (k === 0)  // cristas só na principal, pra não embolar
       for (const t of [0.25, 0.5, 0.75]) {
@@ -751,7 +786,7 @@ function desenharMapa(h) {
   const ruim = h.vento_txt.startsWith('maral'), corV = ruim ? '#F2726B' : '#5FD1C2';
   if (h.vel != null && h.dir_vento != null) {
     const [vx, vy] = vec(h.dir_vento), Lv = 30 + Math.min(h.vel, 40) * 1.5;
-    for (const [x, y] of [[620, 70], [1010, 110], [1200, 300], [1480, 330], [700, 610]])
+    for (const [x, y] of MP.vento)
       out += seta(x + vx * Lv / 2, y + vy * Lv / 2, x - vx * Lv / 2, y - vy * Lv / 2, corV, 3, 0.85);
   }
   g.innerHTML = out;
@@ -767,6 +802,9 @@ mostrar(dias.includes(hojeISO) ? hojeISO : dias[0]);
 """
 
 if __name__ == "__main__":
-    cmd = sys.argv[1] if len(sys.argv) > 1 else "previsao"
-    {"previsao": lambda: cmd_previsao(), "log": lambda: cmd_log(sys.argv[2:]),
+    args = sys.argv[1:]
+    if args and args[0] in PICOS:
+        usar_pico(args.pop(0))
+    cmd = args[0] if args else "previsao"
+    {"previsao": lambda: cmd_previsao(), "log": lambda: cmd_log(args[1:]),
      "calibrar": lambda: cmd_calibrar()}.get(cmd, lambda: sys.exit(__doc__))()

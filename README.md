@@ -4,7 +4,9 @@ Previsão de surf feita sob medida para **um pico só**: a Praia da Barrinha (It
 
 Os sites de previsão usam um ponto de mar aberto e ignoram o molhe, que muda tudo por aqui: o swell de leste entra direto, o de sul é barrado. Este projeto junta vários modelos de onda e vento, aplica as regras do pico e **aprende com as sessões reais** de quem surfa lá.
 
-**🔗 Ao vivo:** https://juanaudaces.github.io/barrinha_forecast/
+**🔗 Ao vivo:** https://juanaudaces.github.io/barrinha_forecast/ · Praia do Sol: https://juanaudaces.github.io/barrinha_forecast/sol.html
+
+A **Praia do Sol**, logo ao norte, tem página própria: beach break aberto, sem molhe, com diário e calibração separados. Basta colocar `sol` depois de `surf.py` em qualquer comando (`python surf.py sol`, `python surf.py sol log 4 1.0`, ...).
 
 ![Painel no computador](docs/painel.png)
 

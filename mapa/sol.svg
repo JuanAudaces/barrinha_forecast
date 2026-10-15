@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1621 662" role="img" aria-label="Mapa estilizado da Praia do Sol com pontos de referência">
+  <!-- Coordenadas no mesmo sistema da foto de satélite (1621x662) para os pontos baterem com a imagem original. -->
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap');
+      .mono{font-family:'IBM Plex Mono',monospace}
+      .sans{font-family:'Bricolage Grotesque',system-ui,sans-serif}
+      .espuma{fill:none;stroke:#5FD1C2;stroke-linecap:round}
+      .cota{fill:none;stroke:#2A4A62;stroke-width:1.5;stroke-dasharray:4 8}
+      .rotulo{font-family:'Bricolage Grotesque',system-ui,sans-serif;font-size:17px;font-weight:600;fill:#EAF2F1}
+      .num{font-family:'Bricolage Grotesque',system-ui,sans-serif;font-size:19px;font-weight:800;fill:#0B1B2B}
+    </style>
+    <linearGradient id="mar" x1="0" y1="0" x2="1" y2="0.3">
+      <stop offset="0" stop-color="#0C2131"/><stop offset="0.55" stop-color="#0A1A29"/><stop offset="1" stop-color="#081521"/>
+    </linearGradient>
+    <pattern id="pedras" width="14" height="14" patternUnits="userSpaceOnUse">
+      <rect width="14" height="14" fill="#3B5A70"/><circle cx="4" cy="4" r="2.6" fill="#506F84"/><circle cx="11" cy="10" r="2.2" fill="#2E4A5E"/>
+    </pattern>
+    <clipPath id="card"><rect width="1621" height="662" rx="28"/></clipPath>
+  </defs>
+
+  <g clip-path="url(#card)">
+    <rect width="1621" height="662" fill="url(#mar)"/>
+
+    <!-- linhas de profundidade (ilustrativas) -->
+    <path class="cota" d="M760,0 C740,200 760,400 880,662"/>
+    <path class="cota" d="M1050,0 C1020,250 1060,450 1200,662"/>
+    <path class="cota" d="M1380,0 C1350,250 1400,450 1550,662"/>
+
+    <!-- terra -->
+    <path fill="#1C374C" d="M0,0 H435 L431,324 L443,486 L470,530 L570,585 L660,640 L690,662 H0 Z"/>
+    <path fill="none" stroke="#2A4A62" stroke-width="18" stroke-linecap="round" d="M216,0 L321,662"/>
+    <g fill="#24435A"><rect x="40" y="20" width="90" height="70" rx="6"/><rect x="20" y="160" width="110" height="80" rx="6"/><rect x="60" y="320" width="100" height="70" rx="6"/><rect x="30" y="470" width="120" height="80" rx="6"/><rect x="270" y="30" width="110" height="70" rx="6"/><rect x="290" y="150" width="100" height="90" rx="6"/><rect x="300" y="300" width="90" height="70" rx="6"/><rect x="320" y="420" width="80" height="70" rx="6"/><rect x="360" y="560" width="110" height="70" rx="6"/></g>
+    <!-- areia -->
+    <path fill="#C9B48A" fill-opacity="0.9" d="M435,0 H482 L488,324 L508,470 L495,525 L470,530 L443,486 L431,324 Z"/>
+    <path fill="none" stroke="#EAF2F1" stroke-opacity="0.35" stroke-width="2" d="M482,0 L488,324 L508,470 L495,525"/>
+
+    <!-- costão das Pedras Brancas e Negras (sul) -->
+    <path fill="url(#pedras)" opacity="0.85" d="M465,515 L535,535 L595,565 L655,605 L710,662 L672,662 L625,622 L570,592 L515,566 L470,546 Z"/>
+
+    <!-- espuma / arrebentação -->
+    <g class="espuma">
+      <path stroke-width="16" stroke-opacity="0.18" d="M565,0 C575,150 600,330 622,470"/>
+      <path stroke-width="2.5" stroke-opacity="0.8" stroke-dasharray="14 9" d="M572,0 C582,150 607,330 630,470"/>
+      <path stroke-width="16" stroke-opacity="0.18" d="M530,0 C540,150 548,330 560,470"/>
+      <path stroke-width="1.5" stroke-opacity="0.5" stroke-dasharray="8 10" d="M500,0 C503,160 509,330 525,480"/>
+      <path stroke-width="16" stroke-opacity="0.18" d="M565,525 C615,545 655,585 695,645"/>
+      <path stroke-width="2.5" stroke-opacity="0.6" stroke-dasharray="14 9" d="M575,515 C625,535 668,578 712,640"/>
+    </g>
+
+    <!-- textos de lugar -->
+    <text class="mono" font-size="12" fill="#8FA6B2" letter-spacing="2" transform="translate(236,250) rotate(81)">AV. ITAJUBA</text>
+    <text class="mono" font-size="12" fill="#0B1B2B" fill-opacity="0.7" letter-spacing="2" transform="translate(452,180) rotate(88)">PRAIA</text>
+    <text class="mono" font-size="12" fill="#8FA6B2" letter-spacing="2" x="560" y="640">COSTÃO</text>
+
+    <!-- rosa dos ventos -->
+    <g transform="translate(1560,62)">
+      <circle r="26" fill="#12283B" stroke="#2A4A62" stroke-width="2"/>
+      <path d="M0,-17 L7,6 L0,1 L-7,6 Z" fill="#EAF2F1"/>
+      <text class="mono" font-size="11" fill="#8FA6B2" text-anchor="middle" y="44">N</text>
+    </g>
+
+    <!-- título -->
+    <g id="mapa-titulo" transform="translate(900,44)">
+      <rect x="-14" y="-28" width="240" height="78" rx="18" fill="#0B1B2B" fill-opacity="0.88"/>
+      <text class="mono" font-size="12" fill="#8FA6B2" letter-spacing="2">BARRA VELHA · SC</text>
+      <text class="sans" font-size="30" font-weight="800" fill="#EAF2F1" y="34" letter-spacing="-0.5">Praia do Sol</text>
+    </g>
+
+    <!-- pontos de referência (mesma numeração do pontos_sol.json) -->
+    <g id="pontos">
+      <g transform="translate(611,328)"><circle r="19" fill="#FF8A3D" stroke="#0B1B2B" stroke-width="3"/><text class="num" text-anchor="middle" y="7">1</text>
+        <rect x="-74" y="-70" width="148" height="34" rx="17" fill="#0B1B2B" fill-opacity="0.9"/><text class="rotulo" x="-58" y="-47">Pico do Sol</text></g>
+      <g transform="translate(590,505)"><circle r="19" fill="#FF8A3D" stroke="#0B1B2B" stroke-width="3"/><text class="num" text-anchor="middle" y="7">2</text>
+        <rect x="26" y="-17" width="176" height="34" rx="17" fill="#0B1B2B" fill-opacity="0.9"/><text class="rotulo" x="42" y="6">Canto do Costão</text></g>
+      <g transform="translate(522,395)"><circle r="19" fill="#FF8A3D" stroke="#0B1B2B" stroke-width="3"/><text class="num" text-anchor="middle" y="7">3</text>
+        <rect x="-205" y="-17" width="180" height="34" rx="17" fill="#0B1B2B" fill-opacity="0.9"/><text class="rotulo" x="-189" y="6">Inside (beirinha)</text></g>
+      <g transform="translate(565,130)"><circle r="19" fill="#FF8A3D" stroke="#0B1B2B" stroke-width="3"/><text class="num" text-anchor="middle" y="7">4</text>
+        <rect x="26" y="-17" width="148" height="34" rx="17" fill="#0B1B2B" fill-opacity="0.9"/><text class="rotulo" x="42" y="6">Banco Norte</text></g>
+    </g>
+  </g>
+</svg>

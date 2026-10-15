@@ -1,0 +1,16 @@
+{
+  "mapa": "sol.svg",
+  "largura": 1621,
+  "altura": 662,
+  "obs": "x/y no sistema de coordenadas do SVG (norte para cima, praia correndo N-S à esquerda).",
+  "pontos": [
+    {"id": 1, "nome": "Pico do Sol", "x": 611, "y": 328,
+     "descricao": "Onde você mais fica (pin -26.679332, -48.687376), no meio da praia, mais pro sul."},
+    {"id": 2, "nome": "Canto do Costão", "x": 590, "y": 505,
+     "descricao": "Canto sul, colado no Costão das Pedras Brancas e Negras."},
+    {"id": 3, "nome": "Inside (beirinha)", "x": 522, "y": 395,
+     "descricao": "Shorebreak, onde a onda perde força ou fecha na beira."},
+    {"id": 4, "nome": "Banco Norte", "x": 565, "y": 130,
+     "descricao": "Bancada mais pro norte da praia."}
+  ]
+}
