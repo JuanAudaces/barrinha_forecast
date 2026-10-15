@@ -507,7 +507,7 @@ section{background:var(--card);border:1px solid var(--line);border-radius:24px;p
   .board{height:100vh;max-width:none;border-radius:0;padding:8px 10px;gap:6px;
     display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto minmax(0,1fr)}
   header{flex-wrap:nowrap;align-items:center;gap:10px}
-  #local,#quando,.foot,#outros{display:none!important}
+  #local,#quando,.foot,#falarTxt{display:none}
   h1{font-size:18px}
   .pill{padding:3px 10px;font-size:11px;gap:5px}.pill svg{width:12px;height:12px}
   .dias{justify-self:end;max-width:100%;gap:3px;align-self:center}
