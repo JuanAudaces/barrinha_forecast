@@ -69,6 +69,9 @@ PICOS = {
               "fator_direcao": [(0, 0.3), (30, 0.6), (60, 0.85), (90, 1.0), (130, 1.0),
                                 (160, 0.8), (190, 0.5), (230, 0.15), (330, 0.1), (360, 0.3)],
               "praia_virada_para": 90,
+              # Maré seca deixa as pedras pra fora: nota zera abaixo de 0.2 m e só fica cheia acima de 0.4 m
+              # (nível do modelo; 18/10 8h, maré cheia e surfável, deu 0.53). Ajuste conforme as sessões.
+              "mare_minima": (0.2, 0.4),
               "pagina": "bolha.html",
               "arquivos_mapa": "barrinha",  # mesmo mapa e pontos da Barrinha
               "mapa": {**CONFIG["mapa"], "alvo": [1045, 430]}},
@@ -153,13 +156,16 @@ def fator_tamanho(altura):
     return max(1 - (altura - hi) / 1.2 * 0.8, 0.2)  # cai conforme passa do seu nível
 
 
-def nota(altura, periodo, vel, dir_):
+def nota(altura, periodo, vel, dir_, mare=None):
+    f_mare = 1.0
+    if (lim := CONFIG.get("mare_minima")) and mare is not None:
+        f_mare = min(max((mare - lim[0]) / (lim[1] - lim[0]), 0), 1)
     f_periodo = min(max((periodo - 4) / 6, 0.4), 1)  # 10 s ou mais = ótimo
     f_vento = 1.0
     if vel is not None and vel > CONFIG["vento_fraco_kmh"]:
         maral = componente_maral(vel, dir_)
         f_vento = 1.0 if maral <= 3 else max(0.15, 1 - (maral - 3) / 22)
-    return round(5 * fator_tamanho(altura) * f_periodo * f_vento, 1)
+    return round(5 * fator_tamanho(altura) * f_periodo * f_vento * f_mare, 1)
 
 
 # ---------------------------------------------------------------- textos
@@ -334,7 +340,7 @@ def montar_horas(ondas, vento, mar, cal):
             "tamanho": tamanho_txt(est), "prancha": nome_p, "prancha_desc": desc_p,
             "pts_long": pts_long, "pts_pranchinha": pts_pranchinha,
             "vento_txt": vento_txt(vel, dir_v),
-            "nota": nota(est, periodo, vel, dir_v),
+            "nota": nota(est, periodo, vel, dir_v, mare[i]),
         })
     return horas
 
