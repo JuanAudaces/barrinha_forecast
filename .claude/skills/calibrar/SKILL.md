@@ -1,13 +1,15 @@
 ---
 name: calibrar
-description: Registra uma sessão de surf na Praia da Barrinha ou na Praia do Sol a partir do relato do usuário (dia, hora, tamanho, como estava) e roda a calibração da previsão. Use quando o usuário contar como estava o mar num dia em que foi à praia, pedir para registrar/anotar uma sessão, ou invocar /calibrar.
+description: Registra uma sessão de surf na Praia da Barrinha, na Bolha ou na Praia do Sol a partir do relato do usuário (dia, hora, tamanho, como estava) e roda a calibração da previsão. Use quando o usuário contar como estava o mar num dia em que foi à praia, pedir para registrar/anotar uma sessão, ou invocar /calibrar.
 ---
 
 # Calibrar a previsão com uma sessão
 
-O usuário conta, em português livre, como estava o mar num dia em que surfou, na **Barrinha** (padrão) ou na **Praia do Sol**. Se não ficar claro qual praia, pergunte.
+O usuário conta, em português livre, como estava o mar num dia em que surfou, na **Barrinha** (padrão), na **Bolha** ou na **Praia do Sol**. Se não ficar claro qual praia, pergunte.
 
 **Praia do Sol:** coloque `sol` logo depois de `surf.py` em todos os comandos (`python surf.py sol log ...`, `python surf.py sol calibrar`, `python surf.py sol`). Ela tem diário, calibração e mapa próprios: `sessoes_sol.csv`, `calibracao_sol.json` e `mapa/pontos_sol.json` (hoje: 1 Pico do Sol, onde ele mais fica; 2 Canto do Costão; 3 Inside/beirinha; 4 Banco Norte). No commit, adicione esses arquivos em vez dos da Barrinha.
+**Bolha** (ponto 6 da Barrinha, lado de fora do molhe): tem calibração própria porque se comporta diferente dos outros pontos. Se ele surfou na Bolha, use `bolha` depois de `surf.py` (`python surf.py bolha log ...`, `python surf.py bolha calibrar`, `python surf.py bolha`) com `--levanta 6` se fizer sentido; arquivos `sessoes_bolha.csv` e `calibracao_bolha.json` (mapa e pontos são os da Barrinha). Se no mesmo horário ele contar como estava o resto da Barrinha (ex.: "pontos 1 e 2 uma lagoa"), registre também uma sessão na Barrinha com essa altura e nota.
+
  Você transforma o relato em um registro no diário (`sessoes.csv`), roda a calibração e devolve um resumo curto. Tudo roda a partir da raiz do projeto (onde está `surf.py`), com `PYTHONIOENCODING=utf-8` para os acentos saírem certos no terminal.
 
 ## 1. Extrair do relato

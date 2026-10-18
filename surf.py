@@ -1,9 +1,9 @@
-"""Previsão de surf personalizada para a Praia da Barrinha e a Praia do Sol (Barra Velha/SC).
+"""Previsão de surf personalizada para a Praia da Barrinha, a Bolha e a Praia do Sol (Barra Velha/SC).
 
 Uso (o pico é opcional, padrão barrinha):
-  python surf.py [sol]                                  # gera a página e abre no navegador
-  python surf.py [sol] log <nota 1-5> <altura_m> ["AAAA-MM-DD HH"] ["obs"]
-  python surf.py [sol] calibrar                         # ajusta fatores com o diário de sessões
+  python surf.py [sol|bolha]                          # gera a página e abre no navegador
+  python surf.py [sol|bolha] log <nota 1-5> <altura_m> ["AAAA-MM-DD HH"] ["obs"]
+  python surf.py [sol|bolha] calibrar                 # ajusta fatores com o diário de sessões
 """
 import argparse
 import csv
@@ -62,6 +62,16 @@ PICOS = {
             "pagina": "sol.html",
             "mapa": {"viewbox": [150, 0, 1471, 662], "centro_x": 640, "alvo": [640, 330],
                      "vento": [[300, 90], [820, 110], [1150, 320], [1450, 520], [880, 590]]}},
+    "bolha": {**CONFIG,
+              "nome": "Bolha",
+              # Lado de fora do molhe, perto do costão: recebe o SE que o molhe tira da Barrinha.
+              # Muita pedra, só dá com maré cheia. Hipótese inicial, a calibração corrige.
+              "fator_direcao": [(0, 0.3), (30, 0.6), (60, 0.85), (90, 1.0), (130, 1.0),
+                                (160, 0.8), (190, 0.5), (230, 0.15), (330, 0.1), (360, 0.3)],
+              "praia_virada_para": 90,
+              "pagina": "bolha.html",
+              "arquivos_mapa": "barrinha",  # mesmo mapa e pontos da Barrinha
+              "mapa": {**CONFIG["mapa"], "alvo": [1045, 430]}},
 }
 
 
@@ -73,8 +83,9 @@ def usar_pico(nome):
     CALIBRACAO = DIR / f"calibracao{sfx}.json"
     SAIDA = DIR / f"previsao{sfx}.html"
     AUDIO = DIR / "audio" / nome if sfx else DIR / "audio"  # publicado ao lado da página
-    MAPA = DIR / "mapa" / f"{nome}.svg"
-    PONTOS = DIR / "mapa" / f"pontos{sfx}.json"
+    mapa = CONFIG.get("arquivos_mapa", nome)
+    MAPA = DIR / "mapa" / f"{mapa}.svg"
+    PONTOS = DIR / "mapa" / ("pontos.json" if mapa == "barrinha" else f"pontos_{mapa}.json")
 
 
 usar_pico("barrinha")
