@@ -1,19 +1,19 @@
 {
-  "n_sessoes": 6,
+  "n_sessoes": 7,
   "mae": {
-    "ecmwf_wam025": 0.58,
-    "ncep_gfswave025": 0.49,
-    "meteofrance_wave": 0.45,
-    "dwd_gwam": 0.41
+    "ecmwf_wam025": 0.56,
+    "ncep_gfswave025": 0.48,
+    "meteofrance_wave": 0.41,
+    "dwd_gwam": 0.38
   },
   "fator_setor": {
     "E": 0.83,
-    "SE": 0.33
+    "SE": 0.39
   },
   "peso_modelo": {
-    "ecmwf_wam025": 1.72,
-    "ncep_gfswave025": 2.04,
-    "meteofrance_wave": 2.22,
-    "dwd_gwam": 2.44
+    "ecmwf_wam025": 1.79,
+    "ncep_gfswave025": 2.08,
+    "meteofrance_wave": 2.44,
+    "dwd_gwam": 2.63
   }
 }
