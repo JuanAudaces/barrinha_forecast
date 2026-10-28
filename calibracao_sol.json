@@ -1,11 +1,13 @@
 {
-  "n_sessoes": 1,
+  "n_sessoes": 2,
   "mae": {
-    "ecmwf_wam025": 0.01,
-    "ncep_gfswave025": 0.25,
-    "meteofrance_wave": 0.36,
-    "dwd_gwam": 0.43
+    "ecmwf_wam025": 0.28,
+    "ncep_gfswave025": 0.3,
+    "meteofrance_wave": 0.33,
+    "dwd_gwam": 0.31
   },
-  "fator_setor": {},
+  "fator_setor": {
+    "SE": 0.88
+  },
   "peso_modelo": {}
 }
